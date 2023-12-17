@@ -2,5 +2,5 @@ from qumpy.simulators import AnalyticDoubleSymmetricPotentialTransmissionSimulat
 
 # Simulate the transmission
 
-transmission_sim = AnalyticDoubleSymmetricPotentialTransmissionSimulator(V0=1.0)
+transmission_sim = AnalyticDoubleSymmetricPotentialTransmissionSimulator()
 transmission_sim.show_transmission_plot()

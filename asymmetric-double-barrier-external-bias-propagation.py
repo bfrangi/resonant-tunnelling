@@ -14,7 +14,9 @@ def double_asymmetric_barrier_potential(x, V1, V2):
         "end": 12,  # nm
     }
     bias = -0.63/12*x
-    if barrier_1["start"] <= x < barrier_1["end"]:
+    if x < barrier_1["start"]:
+        return 0.0
+    elif barrier_1["start"] <= x < barrier_1["end"]:
         return V1 + bias
     elif barrier_2["start"] <= x < barrier_2["end"]:
         return V2 + bias

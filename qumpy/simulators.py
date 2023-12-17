@@ -173,8 +173,9 @@ class TransmissionSimulator:
 
 
 class AnalyticDoubleSymmetricPotentialTransmissionSimulator:
-    def __init__(self, V0):
-        self.V0 = V0
+    def __init__(self, V1=1.0, V2=1.0):
+        self.V1 = V1
+        self.V2 = V2
         self.w_1 = 0.2  # nm
         self.w_2 = 0.4  # nm
         self.w_3 = 0.6  # nm
@@ -183,6 +184,7 @@ class AnalyticDoubleSymmetricPotentialTransmissionSimulator:
         self.E_density = 1000
         self.E_top_margin = 0.5
         self.E_arr = None
+        self.E_max = None
         self.T_arr = None
         self.plt = None
 
@@ -200,7 +202,8 @@ class AnalyticDoubleSymmetricPotentialTransmissionSimulator:
 
     def compute_energy_array(self):
         from numpy import array
-        max_E = self.V0 * (1 + self.E_top_margin)
+        max_E = self.E_max if self.E_max is not None else max(self.V1, self.V2)
+        max_E = max_E * (1 + self.E_top_margin)
         density = self.E_density
         max_i = int(max_E * density)
         self.E_arr = array([i/density for i in range(1, max_i)])
@@ -220,9 +223,9 @@ class AnalyticDoubleSymmetricPotentialTransmissionSimulator:
         from numpy import arctan, exp, absolute
         try:
             k_1 = self.k(E, 0)
-            X_2 = self.X(E, self.V0)
+            X_2 = self.X(E, self.V1)
             k_3 = self.k(E, 0)
-            X_4 = self.X(E, self.V0)
+            X_4 = self.X(E, self.V2)
             k_5 = self.k(E, 0)
 
             phi_1 = k_3*self.w_3
@@ -252,11 +255,11 @@ class AnalyticDoubleSymmetricPotentialTransmissionSimulator:
 
 
     def compute_transmission_array(self):
-        from numpy import array
+        from numpy import array, absolute
         E_arr = self.E_arr if self.E_arr is not None else self.compute_energy_array()
         T_arr = []
         for E in E_arr:
-            T_arr.append(float(self.compute_transmission(E)))
+            T_arr.append(absolute(self.compute_transmission(E)))
         self.T_arr = array(T_arr)
         return self.T_arr
 
