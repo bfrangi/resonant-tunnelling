@@ -1,5 +1,5 @@
-import numpy as np
-np.seterr(all='raise')
+from numpy import seterr
+seterr(all='raise')
 
 
 ####################################################################################################
@@ -36,6 +36,9 @@ class PotentialSimulator:
         plt.plot(x_arr, V_arr)
         plt.xlim([x_arr[0], x_arr[-1]])
         plt.ylim([min(V_arr), 1.2*max(V_arr)])
+        plt.xlabel("x (nm)")
+        plt.ylabel("V (eV)")
+        plt.title("Potential")
         self.plt = plt
         return self.plt
 
@@ -69,8 +72,7 @@ class TransmissionSimulator:
 
         # Adimensionalised constants
         hbar = 1.0545718e-34  # J·s = ML²T⁻¹
-        # eV^(1/2) nm m_e^(1/2)
-        self.hbar = hbar/(sqrt(self.eV)*self.nm*sqrt(self.m_e))
+        self.hbar = hbar/(sqrt(self.eV)*self.nm*sqrt(self.m_e)) # eV^(1/2) nm m_e^(1/2)
         self.m = 1.0  # m_e
 
     def compute_energy_array(self):
@@ -109,7 +111,7 @@ class TransmissionSimulator:
         x_arr = self.x_arr
 
         # Initial propagation matrix
-        P = np.array([
+        P = array([
             [1, 0],
             [0, 1],
         ], dtype=complex)
@@ -128,7 +130,7 @@ class TransmissionSimulator:
             dL = x_arr[i+1] - x_arr[i]
             frac = k_arr[i + 1]/k_arr[i]
             exponent = 1j*k_arr[i]*dL
-            P @= np.array([
+            P @= array([
                 [(1 + frac) * exp(-exponent),
                  (1 - frac) * exp(-exponent)],
                 [(1 - frac) * exp(exponent),
@@ -154,6 +156,119 @@ class TransmissionSimulator:
         T_arr = self.T_arr if self.T_arr is not None else self.compute_transmission_array()
         plt.plot(E_arr, T_arr)
         plt.xlim([E_arr[0], E_arr[-1]])
+        plt.xlabel("E (eV)")
+        plt.ylabel("T")
+        plt.title("Transmission coefficient as a function of the electron energy")
+        self.plt = plt
+        return self.plt
+
+    def show_transmission_plot(self):
+        plt = self.plt if self.plt is not None else self.generate_transmission_plot()
+        plt.show()
+
+
+####################################################################################################
+#                       AnalyticDoubleSymmetricPotentialTransmissionSimulator                      #
+####################################################################################################
+
+
+class AnalyticDoubleSymmetricPotentialTransmissionSimulator:
+    def __init__(self, V0):
+        self.V0 = V0
+        self.w_1 = 0.2  # nm
+        self.w_2 = 0.4  # nm
+        self.w_3 = 0.6  # nm
+        self.w_4 = 0.4  # nm
+        self.w_5 = 0.4  # nm
+        self.E_density = 1000
+        self.E_top_margin = 0.5
+        self.E_arr = None
+        self.T_arr = None
+        self.plt = None
+
+        from numpy import sqrt
+
+        # Unit Base
+        self.m_e = 9.1093837e-31  # kg = M
+        self.eV = 1.602176634e-19  # J = ML²T⁻²
+        self.nm = 1e-9  # m = L
+
+        # Adimensionalised constants
+        hbar = 1.0545718e-34  # J·s = ML²T⁻¹
+        self.hbar = hbar/(sqrt(self.eV)*self.nm*sqrt(self.m_e)) # eV^(1/2) nm m_e^(1/2)
+        self.m = 1.0  # m_e
+
+    def compute_energy_array(self):
+        from numpy import array
+        max_E = self.V0 * (1 + self.E_top_margin)
+        density = self.E_density
+        max_i = int(max_E * density)
+        self.E_arr = array([i/density for i in range(1, max_i)])
+        return self.E_arr
+    
+    def k(self, E, V):
+        from numpy import emath
+        return emath.sqrt(2*self.m*(E-V)/self.hbar**2)
+
+
+    def X(self, E, V):
+        from numpy import emath
+        return emath.sqrt(2*self.m*(V-E)/self.hbar**2)
+
+
+    def compute_transmission(self, E):
+        from numpy import arctan, exp, absolute
+        try:
+            k_1 = self.k(E, 0)
+            X_2 = self.X(E, self.V0)
+            k_3 = self.k(E, 0)
+            X_4 = self.X(E, self.V0)
+            k_5 = self.k(E, 0)
+
+            phi_1 = k_3*self.w_3
+            phi_2 = arctan(X_2/k_1)
+            phi_3 = arctan(X_2/k_3)
+            phi_4 = arctan(X_4/k_3)
+            phi_5 = arctan(X_4/k_5)
+
+            K = exp(X_2*self.w_2 + X_4*self.w_4)*(
+                exp(1j*(- phi_1 + phi_2 + phi_3 + phi_4 + phi_5))
+                - exp(1j*(phi_1 + phi_2 - phi_3 - phi_4 + phi_5))
+            ) + exp(X_2*self.w_2 - X_4*self.w_4)*(
+                - exp(1j*(- phi_1 + phi_2 + phi_3 - phi_4 - phi_5))
+                + exp(1j*(phi_1 + phi_2 - phi_3 + phi_4 - phi_5))
+            ) + exp(-X_2*self.w_2 + X_4*self.w_4)*(
+                - exp(1j*(- phi_1 - phi_2 - phi_3 + phi_4 + phi_5))
+                + exp(1j*(phi_1 - phi_2 + phi_3 - phi_4 + phi_5))
+            ) + exp(-X_2*self.w_2 - X_4*self.w_4)*(
+                exp(1j*(- phi_1 - phi_2 - phi_3 - phi_4 - phi_5))
+                - exp(1j*(phi_1 - phi_2 + phi_3 + phi_4 - phi_5))
+            )
+
+            return (2.0**8 * k_1 * (X_2 * k_3 * X_4)**2 * k_5) / absolute(K)**2 \
+                / (k_1**2 + X_2**2) / (k_3**2 + X_2**2) / (k_3**2 + X_4**2) / (k_5**2 + X_4**2)
+        except:
+            return 1
+
+
+    def compute_transmission_array(self):
+        from numpy import array
+        E_arr = self.E_arr if self.E_arr is not None else self.compute_energy_array()
+        T_arr = []
+        for E in E_arr:
+            T_arr.append(float(self.compute_transmission(E)))
+        self.T_arr = array(T_arr)
+        return self.T_arr
+
+    def generate_transmission_plot(self):
+        import matplotlib.pyplot as plt
+        E_arr = self.E_arr if self.E_arr is not None else self.compute_energy_array()
+        T_arr = self.T_arr if self.T_arr is not None else self.compute_transmission_array()
+        plt.plot(E_arr, T_arr)
+        plt.xlim([E_arr[0], E_arr[-1]])
+        plt.xlabel("E (eV)")
+        plt.ylabel("T")
+        plt.title("Transmission coefficient as a function of the electron energy")
         self.plt = plt
         return self.plt
 
