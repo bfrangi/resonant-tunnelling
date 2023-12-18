@@ -19,3 +19,9 @@ To run this code on your system you will need:
 
 - Python packages listed in `requirements.txt`. These can be installed by running `pip install -r requirements.txt` in the main project folder.
 
+## Run
+
+Run any of the scripts with:
+```
+python3 <script-name>.py
+```
