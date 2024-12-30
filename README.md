@@ -1,8 +1,8 @@
-# Resonant Tunnelling Simulator
+# Study of the Transmission Coefficient of a General Double Barrier
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.14575814.svg)](https://doi.org/10.5281/zenodo.14575814)
 
-Code for *Numerical Simulation of Resonant Tunnelling* developed for an *Advanced Quantum Mechanics* course of the UC3M *Engineering Physics* degree.
+Code for *Study of the Transmission Coefficient of a General Double Barrier* developed for an *Advanced Quantum Mechanics* course of the UC3M *Engineering Physics* degree.
 
 ## Contents
 
