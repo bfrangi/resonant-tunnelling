@@ -1,4 +1,4 @@
-# Resonant Tunnelling
+# Resonant Tunnelling Simulator
 
 Numerical simulation in an *Advanced Quantum Mechanics* course of the *Engineering Physics* degree.
 
