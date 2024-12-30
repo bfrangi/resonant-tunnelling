@@ -32,7 +32,7 @@ python3 <script-name>.py
 ```bibtex
 @software{bernat_frangi_2024_14575814,
   author       = {Bernat Frangi},
-  title        = {Resonant Tunnelling Simulator},
+  title        = {Study of the Transmission Coefficient of a General Double Barrier},
   month        = 12,
   year         = 2024,
   publisher    = {Zenodo},
