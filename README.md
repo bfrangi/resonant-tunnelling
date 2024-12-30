@@ -1,5 +1,7 @@
 # Resonant Tunnelling Simulator
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.14575814.svg)](https://doi.org/10.5281/zenodo.14575814)
+
 Code for *Numerical Simulation of Resonant Tunnelling* developed for an *Advanced Quantum Mechanics* course of the UC3M *Engineering Physics* degree.
 
 ## Contents
@@ -24,4 +26,17 @@ To run this code on your system you will need:
 Run any of the scripts with:
 ```
 python3 <script-name>.py
+```
+## Cite this repository
+
+```bibtex
+@software{bernat_frangi_2024_14575814,
+  author       = {Bernat Frangi},
+  title        = {Resonant Tunnelling Simulator},
+  month        = 12,
+  year         = 2024,
+  publisher    = {Zenodo},
+  doi          = {10.5281/zenodo.14575814},
+  url          = {https://doi.org/10.5281/zenodo.14575814},
+}
 ```
